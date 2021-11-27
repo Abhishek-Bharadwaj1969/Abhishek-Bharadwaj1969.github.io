@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Hugo 0.89.4" />
+  
+  <meta name="description" content="The above picture obviously lets you know how awful is accepting run rate as a solitary variable to foresee the last score in a restricted overs cricket match. In ODI and T-20 cricket, many elements assume a critical part in choosing what the last score will be. It will depend on some key factors such as number of runs scored in past overs, number of wickets left, score of striker and non-striker batter currently, nature of pitch, weather conditions…">
+  <link rel="stylesheet" href="https://example.com/css/normalize.css">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  
+  
+  
+  <link rel="stylesheet" href="https://example.com/css/cayman.ea0e967413f3851071cc8ace3621bc4205fe8fa79b2abe3d7bf94ff2841f0d47.css">
+  
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+  <title>Cricket Score Prediction | ABhishek Bharadwaj</title>
+</head>
+
+<body>
+  <section class="page-header">
+  <h1 class="project-name">
+    ABhishek Bharadwaj
+  </h1>
+  <h2 class="project-tagline">
+    A Simple Blog
+  </h2>
+  <nav>
+    
+    
+      
+      
+      
+      
+      <a href="/" class="btn">Blog</a>
+    
+      
+      
+      
+      
+      <a href="/tags/" class="btn">Tags</a>
+    
+      
+      
+      
+      
+      <a href="/about/" class="btn">About</a>
+    
+  </nav>
+</section>
+
+  <section class="main-content">
+    
+  <h1>Cricket Score Prediction</h1>
+  <p><img src="https://i.imgur.com/MDX6J0B.jpg" alt=""></p>
+<p>The above picture obviously lets you know how awful is accepting run rate as a solitary variable to foresee the last score in a restricted overs cricket match. In ODI and T-20 cricket, many elements assume a critical part in choosing what the last score will be. It will depend on some key factors such as number of runs scored in past overs, number of wickets left, score of striker and non-striker batter currently, nature of pitch, weather conditions&hellip;</p>
+<h2 id="data-collection">Data Collection</h2>
+<p>I have downloaded the dataset from <a href="https://cricsheet.org/downloads/">cricsheet</a>. The site gives us ball by ball subtleties of matches. We then,  composed a custom code to just incorporate a portion of the highlights which we will utilize.</p>
+<p>The dataset contains ball by ball coverage of:</p>
+<ul>
+<li>1188 ODI matches: data/odi.csv</li>
+<li>1474 T-20 matches: data/t20.csv</li>
+<li>617 IPL matches: data/ipl.csv</li>
+</ul>
+<p>Each dataset comprises of following features:</p>
+<ul>
+<li>mid: Unique ID for match</li>
+<li>date: Date when the match was played</li>
+<li>venue: Stadium where the match was played</li>
+<li>bat_team: Batting team</li>
+<li>bowl_team: Bowling team</li>
+<li>batsman: Striker batter (currently replaced batsman as batter)</li>
+<li>bowler: Bowler</li>
+<li>runs: runs scored by batting team at that instance</li>
+<li>wickets: wickets fallen at that instance</li>
+<li>overs: overs bowled at that instance</li>
+<li>runs_last_5: Total runs scored in last 5 overs</li>
+<li>wickets_last_5: Total wickets that fell in last 5 overs</li>
+<li>striker: max(runs scored by striker, runs scored by non-striker)</li>
+<li>non-striker: min(runs scored by striker, runs scored by non-striker)</li>
+<li>total: Total runs scored by batting team after first innings</li>
+</ul>
+<h2 id="prepare-data-for-consumption">Prepare Data for consumption</h2>
+<h3 id="importing-libraries">Importing Libraries</h3>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">numpy</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">np</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">pandas</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">pd</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">matplotlib.pyplot</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">plt</span>
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">pandas.plotting</span> <span style="color:#008000;font-weight:bold">import</span> scatter_matrix
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">sklearn.model_selection</span> <span style="color:#008000;font-weight:bold">import</span> train_test_split
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">sklearn.preprocessing</span> <span style="color:#008000;font-weight:bold">import</span> StandardScaler
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">sklearn.linear_model</span> <span style="color:#008000;font-weight:bold">import</span> LinearRegression
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">sklearn.ensemble</span> <span style="color:#008000;font-weight:bold">import</span> RandomForestRegressor
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">sklearn.neighbors</span> <span style="color:#008000;font-weight:bold">import</span> KNeighborsClassifier
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">sklearn.linear_model</span> <span style="color:#008000;font-weight:bold">import</span> Lasso
+</code></pre></div><h3 id="meet-and-greet-data">Meet and Greet Data</h3>
+<p>This is the meet and greet step. Get to know your data by first name and learn a little bit about it. What does it look like (datatype and values), what makes it tick (independent/feature variables(s)), what’s its goals in life (dependent/target variable(s)).</p>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">dataset <span style="color:#666">=</span> pd<span style="color:#666">.</span>read_csv(<span style="color:#ba2121">&#39;data/odi.csv&#39;</span>)
+X <span style="color:#666">=</span> dataset<span style="color:#666">.</span>iloc[:,[<span style="color:#666">7</span>,<span style="color:#666">8</span>,<span style="color:#666">9</span>,<span style="color:#666">12</span>,<span style="color:#666">13</span>]]<span style="color:#666">.</span>values <span style="color:#408080;font-style:italic">#Input features</span>
+y <span style="color:#666">=</span> dataset<span style="color:#666">.</span>iloc[:, <span style="color:#666">14</span>]<span style="color:#666">.</span>values <span style="color:#408080;font-style:italic">#Label</span>
+</code></pre></div><p>I have utilized &lsquo;odi.csv&rsquo; datasete here for anticipating scores in ODI cricket. We used only runs, wickets, overs, striker, non-striker as all the other features didn’t make much difference in outcomes.</p>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#008000">print</span>(dataset<span style="color:#666">.</span>shape)
+<span style="color:#008000">print</span>(dataset<span style="color:#666">.</span>head())
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>(350899, 15)
+   mid        date                                 venue bat_team bowl_team  \
+0    1  2006-06-13  Civil Service Cricket Club, Stormont  England   Ireland   
+1    1  2006-06-13  Civil Service Cricket Club, Stormont  England   Ireland   
+2    1  2006-06-13  Civil Service Cricket Club, Stormont  England   Ireland   
+3    1  2006-06-13  Civil Service Cricket Club, Stormont  England   Ireland   
+4    1  2006-06-13  Civil Service Cricket Club, Stormont  England   Ireland   
+
+          batsman       bowler  runs  wickets  overs  runs_last_5  \
+0  ME Trescothick  DT Johnston     0        0    0.1            0   
+1  ME Trescothick  DT Johnston     0        0    0.2            0   
+2  ME Trescothick  DT Johnston     4        0    0.3            4   
+3  ME Trescothick  DT Johnston     6        0    0.4            6   
+4  ME Trescothick  DT Johnston     6        0    0.5            6   
+
+   wickets_last_5  striker  non-striker  total  
+0               0        0            0    301  
+1               0        0            0    301  
+2               0        0            0    301  
+3               0        0            0    301  
+4               0        0            0    301 
+</code></pre><h3 id="data-visualization">Data Visualization</h3>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">scatter_matrix(dataset)
+plt<span style="color:#666">.</span>show()
+dataset<span style="color:#666">.</span>hist()                       <span style="color:#408080;font-style:italic">#histogram</span>
+plt<span style="color:#666">.</span>show()  
+</code></pre></div><p><code>Out:</code>
+<img src="https://i.imgur.com/Hm4QmSY.png" alt=""></p>
+<h2 id="splitting-data-into-training-and-testing-set">Splitting data into training and testing set</h2>
+<p>We have used 75/25 for training and testing respectively.</p>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">X_train, X_test, y_train, y_test <span style="color:#666">=</span> train_test_split(X, y, test_size <span style="color:#666">=</span> <span style="color:#666">0.25</span>, random_state <span style="color:#666">=</span> <span style="color:#666">0</span>)
+</code></pre></div><div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">sc <span style="color:#666">=</span> StandardScaler()
+X_train <span style="color:#666">=</span> sc<span style="color:#666">.</span>fit_transform(X_train)
+X_test <span style="color:#666">=</span> sc<span style="color:#666">.</span>transform(X_test)
+</code></pre></div><div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">X_train, X_test, y_train, y_test
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>(array([[ 0.09370533,  0.44565669,  0.18010786,  0.84849475,  0.3048047 ],
+        [ 0.01649844,  0.44565669, -0.2551692 , -0.89540433, -0.76114359],
+        [ 1.97240628,  1.31445566,  1.61933043,  0.35023787, -0.56127828],
+        ...,
+        [ 0.55694666, -0.85754176,  0.03267531,  2.02295739,  2.56994483],
+        [-0.53681759,  0.01125721, -0.47982834, -0.9309941 , -0.76114359],
+        [-0.8971164 , -0.85754176, -0.90808481, -0.75304522, -0.02830414]]),
+ array([[-0.72983481,  1.31445566, -0.2692104 , -0.468327  , -0.82776536],
+        [-0.43387507,  0.88005618, -0.03753067, -0.21919856,  0.1049394 ],
+        [-1.23167959, -1.29194125, -1.30123829, -0.78863499, -0.69452182],
+        ...,
+        [-0.44674289, -1.29194125, -0.96424959,  0.13669921,  1.70386184],
+        [-1.41182899, -1.29194125, -1.66630938, -1.2513021 , -0.82776536],
+        [-1.30888647, -1.29194125, -1.39250606, -1.00217366, -0.42803475]]),
+ array([252, 230, 295, ..., 401, 302, 247]),
+ array([ 80, 220, 256, ..., 307, 336, 321]))
+</code></pre><div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">X,y
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>(array([[0.00e+00, 0.00e+00, 1.00e-01, 0.00e+00, 0.00e+00],
+        [0.00e+00, 0.00e+00, 2.00e-01, 0.00e+00, 0.00e+00],
+        [4.00e+00, 0.00e+00, 3.00e-01, 0.00e+00, 0.00e+00],
+        ...,
+        [2.01e+02, 8.00e+00, 4.94e+01, 5.90e+01, 1.80e+01],
+        [2.02e+02, 8.00e+00, 4.95e+01, 5.90e+01, 1.80e+01],
+        [2.03e+02, 8.00e+00, 4.96e+01, 5.90e+01, 1.80e+01]]),
+ array([301, 301, 301, ..., 203, 203, 203]))
+</code></pre><div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#008000;font-weight:bold">def</span> <span style="color:#00f">custom_accuracy</span>(y_test,y_pred,thresold):
+    right <span style="color:#666">=</span> <span style="color:#666">0</span>
+
+    l <span style="color:#666">=</span> <span style="color:#008000">len</span>(y_pred)
+    <span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">0</span>,l):
+        <span style="color:#008000;font-weight:bold">if</span>(<span style="color:#008000">abs</span>(y_pred[i]<span style="color:#666">-</span>y_test[i]) <span style="color:#666">&lt;=</span> thresold):
+            right <span style="color:#666">+=</span> <span style="color:#666">1</span>
+    <span style="color:#008000;font-weight:bold">return</span> ((right<span style="color:#666">/</span>l)<span style="color:#666">*</span><span style="color:#666">100</span>)
+</code></pre></div><p>This is a custom fuction defined for testing this model. Custom Accuracy is defined on the basis of difference between the predicted score and actual score. If this difference falls below a particular thresold, we count it as a correct prediction.</p>
+<p><strong>R-sqaured</strong> is a statistic that will give some information about the goodness of fit of a model. In regression, the R-squared coefficient of determination is a statistical measure of how well the regression predictions approximate the real data points. An R-squared value of 1 indicates that the regression predictions perfectly fit the data.</p>
+<h2 id="model">Model</h2>
+<h3 id="linear-regression">Linear Regression</h3>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">lin <span style="color:#666">=</span> LinearRegression()
+lin<span style="color:#666">.</span>fit(X_train,y_train)
+y_pred <span style="color:#666">=</span> lin<span style="color:#666">.</span>predict(X_test)
+score <span style="color:#666">=</span> lin<span style="color:#666">.</span>score(X_test,y_test)<span style="color:#666">*</span><span style="color:#666">100</span>
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;R-squared value:&#34;</span> , score)
+lin_acc<span style="color:#666">=</span>custom_accuracy(y_test,y_pred,<span style="color:#666">25</span>)
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;Custom accuracy:&#34;</span> , lin_acc)
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>R-squared value: 52.737657811129445
+Custom accuracy: 51.78797378170419
+</code></pre><h3 id="random-forest">Random Forest</h3>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">ran <span style="color:#666">=</span> RandomForestRegressor(n_estimators<span style="color:#666">=</span><span style="color:#666">100</span>,max_features<span style="color:#666">=</span><span style="color:#008000;font-weight:bold">None</span>)
+ran<span style="color:#666">.</span>fit(X_train,y_train)
+y_pred <span style="color:#666">=</span> ran<span style="color:#666">.</span>predict(X_test)
+score <span style="color:#666">=</span> ran<span style="color:#666">.</span>score(X_test,y_test)<span style="color:#666">*</span><span style="color:#666">100</span>
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;R-squared value:&#34;</span> , score)
+ran_acc<span style="color:#666">=</span>custom_accuracy(y_test,y_pred,<span style="color:#666">25</span>)
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;Custom accuracy:&#34;</span> , ran_acc)
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>R-squared value: 79.56968334784949
+Custom accuracy: 81.6129951553149
+</code></pre><h3 id="k-nearest-neighbours">K Nearest Neighbours</h3>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">knn <span style="color:#666">=</span> KNeighborsClassifier(n_neighbors <span style="color:#666">=</span> <span style="color:#666">7</span>)
+knn<span style="color:#666">.</span>fit(X_train,y_train)
+y_pred <span style="color:#666">=</span> knn<span style="color:#666">.</span>predict(X_test)
+score <span style="color:#666">=</span> knn<span style="color:#666">.</span>score(X_test,y_test)<span style="color:#666">*</span><span style="color:#666">100</span>
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;R-squared value:&#34;</span> , score)
+knn_acc<span style="color:#666">=</span>custom_accuracy(y_test,y_pred,<span style="color:#666">25</span>)
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;Custom accuracy:&#34;</span> , knn_acc)
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>R-squared value: 64.7044742091764
+Custom accuracy: 77.92533485323455
+</code></pre><h3 id="lasso-regression">Lasso Regression</h3>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">las <span style="color:#666">=</span> Lasso(alpha<span style="color:#666">=</span><span style="color:#666">0.01</span>, max_iter<span style="color:#666">=</span><span style="color:#666">10e5</span>)
+las<span style="color:#666">.</span>fit(X_train,y_train)
+y_pred <span style="color:#666">=</span> las<span style="color:#666">.</span>predict(X_test)
+score <span style="color:#666">=</span> las<span style="color:#666">.</span>score(X_test,y_test)<span style="color:#666">*</span><span style="color:#666">100</span>
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;R-squared value:&#34;</span> , score)
+las_acc<span style="color:#666">=</span>custom_accuracy(y_test,y_pred,<span style="color:#666">37</span>)
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;Custom accuracy:&#34;</span> , las_acc)
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>R-squared value: 52.73751630496808
+Custom accuracy: 67.71045882017668
+</code></pre><h2 id="testing">Testing</h2>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">cur_score<span style="color:#666">=</span><span style="color:#008000">int</span>(<span style="color:#008000">input</span>(<span style="color:#ba2121">&#39;Current Score: &#39;</span>))
+cur_wickets<span style="color:#666">=</span><span style="color:#008000">int</span>(<span style="color:#008000">input</span>(<span style="color:#ba2121">&#39;Current  Wickets: &#39;</span>))
+cur_overs<span style="color:#666">=</span><span style="color:#008000">int</span>(<span style="color:#008000">input</span>(<span style="color:#ba2121">&#39;Current Overs: &#39;</span>))
+cur_striker<span style="color:#666">=</span><span style="color:#008000">int</span>(<span style="color:#008000">input</span>(<span style="color:#ba2121">&#39;Current Striker Score: &#39;</span>))
+cur_non_striker<span style="color:#666">=</span><span style="color:#008000">int</span>(<span style="color:#008000">input</span>(<span style="color:#ba2121">&#39;Current Non-Striker Score: &#39;</span>))
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>Current Score: 130
+Current  Wickets: 7
+Current Overs: 19
+Current Striker Score: 12
+Current Non-Striker Score: 21
+</code></pre><div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#008000;font-weight:bold">if</span> cur_score<span style="color:#666">&lt;</span>cur_striker<span style="color:#666">+</span>cur_non_striker <span style="color:#a2f;font-weight:bold">or</span> cur_overs<span style="color:#666">&lt;</span><span style="color:#666">0</span> <span style="color:#a2f;font-weight:bold">or</span> cur_overs<span style="color:#666">&gt;</span><span style="color:#666">50</span>:
+    <span style="color:#008000">print</span>(<span style="color:#ba2121">&#39;Error in Input&#39;</span>)
+<span style="color:#008000;font-weight:bold">else</span>:
+    new_prediction <span style="color:#666">=</span> lin<span style="color:#666">.</span>predict(sc<span style="color:#666">.</span>transform(np<span style="color:#666">.</span>array([[cur_score,cur_wickets,cur_overs,cur_striker,cur_non_striker]])))
+    <span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;Linear Regression - Prediction score:&#34;</span> , new_prediction)
+    new_prediction <span style="color:#666">=</span> ran<span style="color:#666">.</span>predict(sc<span style="color:#666">.</span>transform(np<span style="color:#666">.</span>array([[cur_score,cur_wickets,cur_overs,cur_striker,cur_non_striker]])))
+    <span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;Random Forest Regression - Prediction score:&#34;</span> , new_prediction)
+    new_prediction <span style="color:#666">=</span> knn<span style="color:#666">.</span>predict(sc<span style="color:#666">.</span>transform(np<span style="color:#666">.</span>array([[cur_score,cur_wickets,cur_overs,cur_striker,cur_non_striker]])))
+    <span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;K Nearest Neighbours - Prediction score:&#34;</span> , new_prediction)
+    new_prediction <span style="color:#666">=</span> las<span style="color:#666">.</span>predict(sc<span style="color:#666">.</span>transform(np<span style="color:#666">.</span>array([[cur_score,cur_wickets,cur_overs,cur_striker,cur_non_striker]])))
+    <span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;Lasso Regression - Prediction score:&#34;</span> , new_prediction)
+</code></pre></div><p><code>Out:</code></p>
+<pre tabindex="0"><code>Linear Regression - Prediction score: [234.70655237]
+Random Forest Regression - Prediction score: [185.76]
+K Nearest Neighbours - Prediction score: [130]
+Lasso Regression - Prediction score: [234.502072]
+</code></pre><div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">a<span style="color:#666">=</span>[]
+a<span style="color:#666">.</span>append(lin_acc)
+a<span style="color:#666">.</span>append(ran_acc)
+a<span style="color:#666">.</span>append(knn_acc)
+a<span style="color:#666">.</span>append(las_acc)
+b<span style="color:#666">=</span>[<span style="color:#ba2121">&#39;Linear&#39;</span>,<span style="color:#ba2121">&#39;Random Forest&#39;</span>,<span style="color:#ba2121">&#39;KNN&#39;</span>,<span style="color:#ba2121">&#39;LASSO&#39;</span>]
+plt<span style="color:#666">.</span>bar(b, a, color <span style="color:#666">=</span><span style="color:#ba2121">&#39;purple&#39;</span>,width <span style="color:#666">=</span> <span style="color:#666">0.4</span>)
+plt<span style="color:#666">.</span>show()
+</code></pre></div><p><img src="https://i.imgur.com/5Ja0wLY.png" alt=""></p>
+<p>Comparing the accuracies of all four algorithms clearly shows that Random Forest Regression gives the highest accuracy</p>
+<p>I implemented Linear Regression from scratch without using <code>sklearn</code> functions</p>
+<p>Linear Regression is a supervised learning algorithm used to predict the real-valued output y based on the given input value x. It depicts the relationship between the dependent variable y and the independent variables xi  ( or features ).  The hypothetical function used for prediction is represented by h( x ).</p>
+<pre tabindex="0"><code> h( x ) = w * x + b  
+    
+  here, b is the bias.
+  x represents the feature vector
+  w represents the weight vector.
+</code></pre><h3 id="mathematical-intuition">Mathematical Intuition</h3>
+<p>The cost function (or loss function) is used to measure the performance of a machine learning model or quantifies the error between the expected values and the values predicted by our hypothetical function. The cost function for Linear Regression is represented by J.</p>
+<p><img src="https://i.imgur.com/dLjGc1w.png" alt=""></p>
+<pre tabindex="0"><code>Here, m is the total number of training examples in the dataset.
+y^i represents the value of target variable for ith training example.
+</code></pre><h3 id="algorithm">Algorithm</h3>
+<pre tabindex="0"><code>repeat until convergence  {
+       tmpi = wi - alpha * dwi          
+       wi = tmpi              
+}
+where alpha is the learning rate.
+</code></pre><h3 id="implementation">Implementation</h3>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#008000;font-weight:bold">class</span> <span style="color:#00f;font-weight:bold">LinearRegression</span>() :
+    <span style="color:#008000;font-weight:bold">def</span> __init__( self, learning_rate, iterations ) :
+        self<span style="color:#666">.</span>learning_rate <span style="color:#666">=</span> learning_rate
+        self<span style="color:#666">.</span>iterations <span style="color:#666">=</span> iterations
+              
+    <span style="color:#008000;font-weight:bold">def</span> <span style="color:#00f">fit</span>( self, X, Y ) :
+        self<span style="color:#666">.</span>m, self<span style="color:#666">.</span>n <span style="color:#666">=</span> X<span style="color:#666">.</span>shape
+        self<span style="color:#666">.</span>W <span style="color:#666">=</span> np<span style="color:#666">.</span>zeros( self<span style="color:#666">.</span>n )
+        self<span style="color:#666">.</span>b <span style="color:#666">=</span> <span style="color:#666">0</span>
+        self<span style="color:#666">.</span>X <span style="color:#666">=</span> X
+        self<span style="color:#666">.</span>Y <span style="color:#666">=</span> Y
+        <span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>( self<span style="color:#666">.</span>iterations ) :
+            self<span style="color:#666">.</span>update_weights()
+        <span style="color:#008000;font-weight:bold">return</span> self
+      
+    <span style="color:#008000;font-weight:bold">def</span> <span style="color:#00f">update_weights</span>( self ) :
+        Y_pred <span style="color:#666">=</span> self<span style="color:#666">.</span>predict( self<span style="color:#666">.</span>X )
+        dW <span style="color:#666">=</span> <span style="color:#666">-</span> ( <span style="color:#666">2</span> <span style="color:#666">*</span> ( self<span style="color:#666">.</span>X<span style="color:#666">.</span>T )<span style="color:#666">.</span>dot( self<span style="color:#666">.</span>Y <span style="color:#666">-</span> Y_pred )  ) <span style="color:#666">/</span> self<span style="color:#666">.</span>m
+        db <span style="color:#666">=</span> <span style="color:#666">-</span> <span style="color:#666">2</span> <span style="color:#666">*</span> np<span style="color:#666">.</span>sum( self<span style="color:#666">.</span>Y <span style="color:#666">-</span> Y_pred ) <span style="color:#666">/</span> self<span style="color:#666">.</span>m 
+        self<span style="color:#666">.</span>W <span style="color:#666">=</span> self<span style="color:#666">.</span>W <span style="color:#666">-</span> self<span style="color:#666">.</span>learning_rate <span style="color:#666">*</span> dW
+        self<span style="color:#666">.</span>b <span style="color:#666">=</span> self<span style="color:#666">.</span>b <span style="color:#666">-</span> self<span style="color:#666">.</span>learning_rate <span style="color:#666">*</span> db
+        <span style="color:#008000;font-weight:bold">return</span> self
+      
+      
+    <span style="color:#008000;font-weight:bold">def</span> <span style="color:#00f">predict</span>( self, X ) :
+        <span style="color:#008000;font-weight:bold">return</span> X<span style="color:#666">.</span>dot( self<span style="color:#666">.</span>W ) <span style="color:#666">+</span> self<span style="color:#666">.</span>b
+</code></pre></div><h3 id="fitting-the-model">Fitting the model</h3>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">model <span style="color:#666">=</span> LinearRegression(learning_rate<span style="color:#666">=</span><span style="color:#666">0.01</span>,iterations<span style="color:#666">=</span><span style="color:#666">1000</span>)
+model<span style="color:#666">.</span>fit(X_train,y_train)
+</code></pre></div><div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">new_prediction <span style="color:#666">=</span> model<span style="color:#666">.</span>predict(sc<span style="color:#666">.</span>transform(np<span style="color:#666">.</span>array([[cur_score,cur_wickets,cur_overs,cur_striker,cur_non_striker]])))
+<span style="color:#008000">print</span>(<span style="color:#ba2121">&#34;Linear Regression - Prediction score:&#34;</span> , new_prediction)
+</code></pre></div><pre tabindex="0"><code>model_acc=custom_accuracy(y_test,y_pred,25)
+print(&quot;Custom accuracy:&quot; , lin_acc)
+</code></pre><p><code>Out:</code> <code>Custom accuracy: 51.78797378170419</code></p>
+<div class="highlight"><pre tabindex="0" style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py">c<span style="color:#666">=</span>[]
+c<span style="color:#666">.</span>append(lin_acc)
+c<span style="color:#666">.</span>append(model_acc)
+d<span style="color:#666">=</span>[<span style="color:#ba2121">&#39;sklearn Linear&#39;</span>,<span style="color:#ba2121">&#39;Scratch Linear&#39;</span>]
+plt<span style="color:#666">.</span>bar(d, c, color <span style="color:#666">=</span><span style="color:#ba2121">&#39;purple&#39;</span>,width <span style="color:#666">=</span> <span style="color:#666">0.4</span>)
+<span style="color:#008000">print</span>(c)
+plt<span style="color:#666">.</span>show()
+</code></pre></div><p><code>Out:</code>
+<img src="https://i.imgur.com/gSLd4nm.png" alt=""></p>
+<h2 id="authors">Authors</h2>
+<ul>
+<li><a href="https://twitter.com/MvpAbhishek">ABhishek Bharadwaj</a></li>
+<li><a href="https://twitter.com/SSVatsav">Sampat</a></li>
+<li><a href="https://twitter.com/">RV Abhishek Barla</a></li>
+<li><a href="https://twitter.com/rith_vik_7">Rithvik</a></li>
+</ul>
+<p>Resources:</p>
+<ul>
+<li><a href="https://www.geeksforgeeks.org/linear-regression-implementation-from-scratch-using-python/">Geeks for Geeks</a></li>
+</ul>
+
+
+    <footer class="site-footer">
+  <span class="site-footer-credits">
+    Copyright © 2021 ABhishek Bharadwaj  ❤️ from <a href="https://gohugo.io/">Hugo</a>.
+  </span>
+</footer>
+
+  </section>
+  
+  
+  <script>
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-123456789-1', 'auto');
+  ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Hugo 0.89.4" />
+  
+  <meta name="description" content="Objective A global positioning system (GPS) receiver is used to get precise geographical location by receiving information from satellites. It not only gives information about location but also information like time, date, height and speed. It is so useful that most smartphones are embedded with it.
+Block Diagram The GPS module continuously transmits serial data in the form of sentences according to NMEA standards. The latitude and longitude values of the location are contained in the GPGGA sentence.">
+  <link rel="stylesheet" href="https://example.com/css/normalize.css">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  
+  
+  
+  <link rel="stylesheet" href="https://example.com/css/cayman.ea0e967413f3851071cc8ace3621bc4205fe8fa79b2abe3d7bf94ff2841f0d47.css">
+  
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+  <title>Interfacing GPS with LPC2148 ARM | ABhishek Bharadwaj</title>
+</head>
+
+<body>
+  <section class="page-header">
+  <h1 class="project-name">
+    ABhishek Bharadwaj
+  </h1>
+  <h2 class="project-tagline">
+    A Simple Blog
+  </h2>
+  <nav>
+    
+    
+      
+      
+      
+      
+      <a href="/" class="btn">Blog</a>
+    
+      
+      
+      
+      
+      <a href="/tags/" class="btn">Tags</a>
+    
+      
+      
+      
+      
+      <a href="/about/" class="btn">About</a>
+    
+  </nav>
+</section>
+
+  <section class="main-content">
+    
+  <h1>Interfacing GPS with LPC2148 ARM</h1>
+  <h2 id="objective">Objective</h2>
+<p>A global positioning system (GPS) receiver is used to get precise geographical location by receiving information from satellites. It not only gives information about location but also information like time, date, height and speed. It is so useful that most smartphones are embedded with it.</p>
+<h2 id="block-diagram">Block Diagram</h2>
+<p><img src="https://i.imgur.com/EnEUuhj.png" alt=""></p>
+<p>The GPS module continuously transmits serial data in the form of sentences according to NMEA standards. The latitude and longitude values of the location are contained in the GPGGA sentence.To communicate over UART or USART, we just need three basic signals which are, namely, RXD (receive), TXD (transmit), GND (common ground).</p>
+<h2 id="circuit-diagram">Circuit Diagram</h2>
+<p><img src="https://i.imgur.com/2VGR2Ss.png" alt=""></p>
+<p>Working Principle</p>
+<p>We need to receive data from the satellite to the LPC2148 Primer Board by using a GPS module through UART0. The serial data is taken from the GPS module through MAX232 into the SBUF register of the LPC2148 microcontroller. The serial data from the GPS receiver is taken by using the Serial Interrupt of the controller. This data consists of a sequence of NMEA sentences from which GPGGA sentences are identified and processed.The first six bytes of the data received are compared with the pre-stored string and if matched then only data is further accounted for; otherwise the process is repeated again. From the comma delimited GPGGA sentence, latitude and longitude positions are extracted by finding the respective comma positions and extracting the data.</p>
+<h2 id="pin-assignment-with-lpc2148">Pin Assignment with LPC2148</h2>
+<p><img src="https://i.imgur.com/hbp36sC.png" alt=""></p>
+<h2 id="program">Program</h2>
+<pre tabindex="0"><code class="language-c=" data-lang="c=">#define CR     0x0D
+#include &lt;LPC21xx.H&gt;
+void init_serial (void);
+int putchar (int ch);
+int getchar (void);
+unsigned char test;
+int main(void)
+{
+    char *Ptr = &quot;*** UART0 Demo ***\n\n\rType Characters to be echoed!!\n\n\r&quot;;
+    VPBDIV = 0x02;   // Divide Pclk by two
+    init_serial();
+    while(1) 
+    {
+        while (*Ptr)
+        {
+            putchar(*Ptr++);
+        }
+        putchar(getchar());  // Echo terminal
+    }
+}
+
+void init_serial (void)
+{
+    PINSEL0  = 0x00000005; // Enable RxD0 and TxD0
+    U0LCR    = 0x00000083;   //8 bits, no Parity, 1 Stop bit
+    U0DLL    = 0x000000C3; //9600 Baud Rate @ 30MHz VPB Clock
+    U0LCR    = 0x00000003;
+}
+
+int putchar (int ch)
+{
+    if (ch == '\n')
+    {
+        while (!(U0LSR &amp; 0x20));
+        U0THR = CR;
+    }
+    while (!(U0LSR &amp; 0x20));
+    return (U0THR = ch);
+}
+int getchar (void)
+{
+    while (!(U0LSR &amp; 0x01));
+    return (U0RBR);
+}
+</code></pre><h2 id="conclusion">Conclusion</h2>
+<p>GPS is used in many fields such as  Agriculture, Aviation, Marine, Public Safety, Rail, Roads &amp; Highways, Space, Surveying &amp; Mapping.Since the GPS system gets calibrated on its own, anyone can use it.As GPS follows trilateration which means  data from three satellites uses  to locate a specific point on the earth , so its user friendly.</p>
+<h2 id="authors">Authors</h2>
+<ul>
+<li><a href="https://twitter.com/MvpAbhishek">ABhishek Bharadwaj</a></li>
+<li><a href="https://twitter.com/SSVatsav">Sampat</a></li>
+<li><a href="https://twitter.com/">RV Abhishek Barla</a></li>
+<li><a href="https://twitter.com/rith_vik_7">Rithvik</a></li>
+</ul>
+
+
+    <footer class="site-footer">
+  <span class="site-footer-credits">
+    Copyright © 2021 ABhishek Bharadwaj  ❤️ from <a href="https://gohugo.io/">Hugo</a>.
+  </span>
+</footer>
+
+  </section>
+  
+  
+  <script>
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-123456789-1', 'auto');
+  ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+</body>
+</html>

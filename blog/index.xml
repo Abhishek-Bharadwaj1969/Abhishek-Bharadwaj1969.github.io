@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on ABhishek Bharadwaj</title>
+    <link>https://example.com/blog/</link>
+    <description>Recent content in Blogs on ABhishek Bharadwaj</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 24 Nov 2021 14:03:57 +0530</lastBuildDate><atom:link href="https://example.com/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Interfacing GPS with LPC2148 ARM</title>
+      <link>https://example.com/blog/esproject/</link>
+      <pubDate>Wed, 24 Nov 2021 14:03:57 +0530</pubDate>
+      
+      <guid>https://example.com/blog/esproject/</guid>
+      <description>Objective A global positioning system (GPS) receiver is used to get precise geographical location by receiving information from satellites. It not only gives information about location but also information like time, date, height and speed. It is so useful that most smartphones are embedded with it.
+Block Diagram The GPS module continuously transmits serial data in the form of sentences according to NMEA standards. The latitude and longitude values of the location are contained in the GPGGA sentence.</description>
+    </item>
+    
+    <item>
+      <title>Predicting the Survival of Titanic Passengers</title>
+      <link>https://example.com/blog/fdsproject/</link>
+      <pubDate>Wed, 24 Nov 2021 11:01:40 +0530</pubDate>
+      
+      <guid>https://example.com/blog/fdsproject/</guid>
+      <description>Define the Problem The sinking of the RMS Titanic is one of the most infamous shipwrecks in history. On April 15, 1912, during her maiden voyage, the Titanic sank after colliding with an iceberg, killing 1502 out of 2224 passengers and crew. This sensational tragedy shocked the international community and led to better safety regulations for ships. One of the reasons that the shipwreck led to such loss of life was that there were not enough lifeboats for the passengers and crew.</description>
+    </item>
+    
+    <item>
+      <title>Cricket Score Prediction</title>
+      <link>https://example.com/blog/mlproject/</link>
+      <pubDate>Sun, 21 Nov 2021 17:38:11 +0530</pubDate>
+      
+      <guid>https://example.com/blog/mlproject/</guid>
+      <description>The above picture obviously lets you know how awful is accepting run rate as a solitary variable to foresee the last score in a restricted overs cricket match. In ODI and T-20 cricket, many elements assume a critical part in choosing what the last score will be. It will depend on some key factors such as number of runs scored in past overs, number of wickets left, score of striker and non-striker batter currently, nature of pitch, weather conditions&amp;hellip;</description>
+    </item>
+    
+  </channel>
+</rss>
